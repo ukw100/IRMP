@@ -82,6 +82,9 @@ void irsnd_init(void)
 {
     // Do not call irsnd_init_and_store_timer() here, it is done at irsnd_send_data().
     pinModeFast(IRSND_OUTPUT_PIN, OUTPUT);
+#  ifdef IRSND_RF_OUTPUT
+    pinModeFast(IRSND_RF_PIN,OUTPUT);
+#  endif
 #  ifdef IRMP_MEASURE_TIMING
     pinModeFast(IRMP_TIMING_TEST_PIN, OUTPUT);
 #  endif
@@ -336,7 +339,13 @@ const uint8_t irsnd_used_protocol_index[] PROGMEM =
     RF_X10_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RF_MEDION_PROTOCOL == 1
-    RF_MEDION_PROTOCOL
+    RF_MEDION_PROTOCOL,
+#endif
+#if IRSND_SUPPORT_RF_HME_PROTOCOL == 1
+    RF_HME_PROTOCOL,
+#endif
+#if IRSND_SUPPORT_RF_AC104_PROTOCOL == 1
+    RF_AC104_PROTOCOL
 #endif
 };
 
@@ -511,7 +520,13 @@ const char * const irsnd_used_protocol_names[] PROGMEM =
     proto_rf_x10,
 #endif
 #if IRSND_SUPPORT_RF_MEDION_PROTOCOL == 1
-    proto_rf_medion
+    proto_rf_medion,
+#endif
+#if IRSND_SUPPORT_RF_HME_PROTOCOL == 1
+    proto_rf_hme,
+#endif
+#if IRSND_SUPPORT_RF_AC104_PROTOCOL == 1
+    proto_rf_ac104
 #endif
 };
 

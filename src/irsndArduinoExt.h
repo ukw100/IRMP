@@ -54,6 +54,9 @@ void irsnd_init(uint_fast8_t aIrsndOutputPin, uint_fast8_t aFeedbackLedPin, bool
 #  if !defined(IRSND_OUTPUT_PIN)                // Arduino IDE uses IRSND_OUTPUT_PIN instead of PORT and BIT
 #define IRSND_OUTPUT_PIN            4
 #  endif
+#  if defined(IRSND_RF_OUTPUT) && !defined(IRSEND_RF_PIN)
+#define IRSND_RF_PIN                12
+#  endif
 #endif // defined(IRMP_IRSND_ALLOW_DYNAMIC_PINS)
 
 void irsnd_data_print(Print *aSerial, IRMP_DATA *aIRMPDataPtr);

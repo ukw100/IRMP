@@ -780,16 +780,28 @@ void irmp_timer_ISR(void)
             // output is active low
             digitalWriteFast(IRSND_OUTPUT_PIN, IR_OUTPUT_ACTIVE_LEVEL); // output is active low
 #  else
+#    if defined(IRSND_RF_OUTPUT)
+            if(irsnd_rf == 1) 
+            {
+              digitalWriteFast(IRSND_RF_PIN, IR_OUTPUT_ACTIVE_LEVEL);
+            }
+            else
+#    endif
             if(sDivider & 0x01) // true / inactive if sDivider is 3 or 1, so we start with active and end with inactive
             {
                 digitalWriteFast(IRSND_OUTPUT_PIN, IR_OUTPUT_INACTIVE_LEVEL);
             } else {
                 digitalWriteFast(IRSND_OUTPUT_PIN, IR_OUTPUT_ACTIVE_LEVEL);
             }
-
-
 #  endif // defined(IRSND_GENERATE_NO_SEND_RF)
         } else {
+#  if defined(IRSND_RF_OUTPUT)
+            if(irsnd_rf == 1) 
+            {
+              digitalWriteFast(IRSND_RF_PIN, IR_OUTPUT_INACTIVE_LEVEL);
+            }
+            else
+#  endif
             // irsnd off here
             digitalWriteFast(IRSND_OUTPUT_PIN, IR_OUTPUT_INACTIVE_LEVEL);
         }

@@ -145,6 +145,8 @@
 #define IRMP_SUPPORT_RF_GEN24_PROTOCOL          0       // RF GEN24 (generic)   >= 15000                 ~250 bytes
 #define IRMP_SUPPORT_RF_X10_PROTOCOL            0       // RF PC X10 (Medion)   >= 15000                 ~250 bytes
 #define IRMP_SUPPORT_RF_MEDION_PROTOCOL         0       // RF PC Medion         >= 15000                 ~250 bytes
+#define IRMP_SUPPORT_RF_HME_PROTOCOL            0       // RF Homeeasy (adv)    >= 15000                 ~250 bytes
+#define IRMP_SUPPORT_RF_AC104_PROTOCOL            0       // RF AC104    >= 15000                 ~250 bytes
 #endif // ! defined(ARDUINO)
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------

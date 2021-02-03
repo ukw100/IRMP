@@ -84,8 +84,10 @@
 #define RF_GEN24_PROTOCOL                       57              // RF Generic, 24 Bits (Pollin 550666, EAN 4049702006022 and many other similar RF remote controls))
 #define RF_X10_PROTOCOL                         58              // RF PC X10 Remote Control (Medion, Pollin 721815)
 #define RF_MEDION_PROTOCOL                      59              // RF PC Medion Remote Control (Medion)
+#define RF_HME_PROTOCOL                         60              // RF Homeeasy advanced protocol (no dimming)
+#define RF_AC104_PROTOCOL                       61
 
-#define IRMP_N_PROTOCOLS                        59              // number of supported protocols
+#define IRMP_N_PROTOCOLS                        61              // number of supported protocols
 
 #if defined(UNIX_OR_WINDOWS) || IRMP_PROTOCOL_NAMES == 1 || IRSND_PROTOCOL_NAMES == 1
 extern const char proto_unknown[]       PROGMEM;
@@ -149,6 +151,8 @@ extern const char proto_onkyo[]         PROGMEM;
 extern const char proto_rf_gen24[]      PROGMEM;
 extern const char proto_rf_x10[]        PROGMEM;
 extern const char proto_rf_medion[]     PROGMEM;
+extern const char proto_rf_hme[]        PROGMEM;
+extern const char proto_rf_ac104[]        PROGMEM;
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1113,12 +1117,13 @@ typedef uint8_t     PAUSE_LEN;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
  * RF GEN24 generic remote control (Pollin 550666, EAN 4049702006022 and many other similar RF remote controls)
+ * Slight tweak of timings to work better as sender for homeeasy simple protocol
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
-#define RF_GEN24_0_PULSE_TIME                   400.0e-6                        //  400 usec pulse
-#define RF_GEN24_0_PAUSE_TIME                  1066.0e-6                        // 1066 usec pause
-#define RF_GEN24_1_PULSE_TIME                  1066.0e-6                        // 1066 usec pulse
-#define RF_GEN24_1_PAUSE_TIME                   400.0e-6                        //  400 usec pause
+#define RF_GEN24_0_PULSE_TIME                   330.0e-6                        //  400 usec pulse
+#define RF_GEN24_0_PAUSE_TIME                  980.0e-6                        // 1066 usec pause
+#define RF_GEN24_1_PULSE_TIME                  980.0e-6                        // 1066 usec pulse
+#define RF_GEN24_1_PAUSE_TIME                   330.0e-6                        //  400 usec pause
 
 #define RF_GEN24_FRAME_REPEAT_PAUSE_TIME         10.0e-3                        // frame repeat after 10 msec
 #define RF_GEN24_ADDRESS_OFFSET                  0                              // skip 0 bits
@@ -1187,6 +1192,55 @@ typedef uint8_t     PAUSE_LEN;
 #define RF_MEDION_LSB                            0                               // MSB...LSB
 #define RF_MEDION_FLAGS                          0                               // flags
 
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------
+ * RF HOMEEASY remote control (advanced protocol)
+ *
+ * Uses a special "space encoding manchester" combination, see https://homeeasyhacking.fandom.com/wiki/Advanced_Protocol
+ * We decode 'double length' bits as normal space encoding and then convert 01 to 0 and 10 to 1 as we receive them
+ * 6 bit command is (MSB to LSB) : group action (1), on/off (1), id within group (4).  Dimming function is not implemented
+ *---------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+#define RF_HME_START_BIT_PULSE_TIME             275.0e-6                         // 275 usec pulse
+#define RF_HME_START_BIT_PAUSE_TIME             2675.0e-6                        // 2675 usec pause
+#define RF_HME_0_PULSE_TIME                      275.0e-6                        //  275 usec pulse
+#define RF_HME_0_PAUSE_TIME                      275.0e-6                        //  275 usec pause
+#define RF_HME_1_PULSE_TIME                      275.0e-6                        //  275 usec pulse
+#define RF_HME_1_PAUSE_TIME                     1225.0e-6                        // 1225 usec pause
+
+#define RF_HME_FRAME_REPEAT_PAUSE_TIME          10.0e-3                        // frame repeat after 10msec
+#define RF_HME_ADDRESS_OFFSET                   0                              
+#define RF_HME_ADDRESS_LEN                      16                             // address is actuall 26 bit (16 + 8 upper bits of command)
+#define RF_HME_COMMAND_OFFSET                   16                             // 16 address bits, actually 26
+#define RF_HME_COMMAND_LEN                      16                             // read 16 command bits: actually 10 additional addr. bits 
+#define RF_HME_COMPLETE_DATA_LEN                32                             // complete length
+#define RF_HME_STOP_BIT                          1                             // has stop bit
+#define RF_HME_LSB                               0                             // MSB...LSB
+#define RF_HME_FLAGS                             0                             // flags
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------
+ * RF AC104 remote control (for shutters / projector screens)
+ *
+ * is a64 bit protocol, 8 bit preamble (0xac), 24 bit id, 16 bit address, 8 bit command and 8 bit checksum
+ * if RF_AC104_ID is received as 24bit id, we store the address and command.  Otherwise address (MSB) and command (LSB) will store the received 24bit id
+ *---------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+#define RF_AC104_START_BIT_PULSE_TIME             5300.0e-6                        // 5300 usec pulse
+#define RF_AC104_START_BIT_PAUSE_TIME              530.0e-6                        // 530 usec pause
+#define RF_AC104_0_PULSE_TIME                      200.0e-6                        // 200 usec pulse
+#define RF_AC104_0_PAUSE_TIME                      580.0e-6                        //  580 usec pause
+#define RF_AC104_1_PULSE_TIME                      580.0e-6                        //  580 usec pulse
+#define RF_AC104_1_PAUSE_TIME                      200.0e-6                        // 200 usec pause
+
+#define RF_AC104_FRAME_REPEAT_PAUSE_TIME           150.0e-6                        // super short frame repeat (150usec).  Needed for sending
+#define RF_AC104_ADDRESS_OFFSET                    32                              // 
+#define RF_AC104_ADDRESS_LEN                       16                              // 16 bit address (each bit corresponds to one of 16 senders)
+#define RF_AC104_COMMAND_OFFSET                    48                              // 8 bit preamble + 24 id + 16 address
+#define RF_AC104_COMMAND_LEN                       8                               // read 8 command bits, 0x0b: up, 0x23 stop, 0x43 down, 0x24 after 
+#define RF_AC104_COMPLETE_DATA_LEN                 65                              // complete length (including trailing 1)
+#define RF_AC104_STOP_BIT                          0                               // has no stop bit, but trailing 1
+#define RF_AC104_LSB                               0                               // MSB...LSB
+#define RF_AC104_FLAGS                             0                               // flags
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
  * Frame Repetitions:

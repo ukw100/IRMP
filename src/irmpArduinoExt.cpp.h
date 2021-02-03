@@ -347,7 +347,13 @@ const uint8_t irmp_used_protocol_index[] PROGMEM =
     RF_X10_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RF_MEDION_PROTOCOL == 1
-    RF_MEDION_PROTOCOL
+    RF_MEDION_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RF_HME_PROTOCOL == 1
+    RF_HME_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RF_AC104_PROTOCOL == 1
+    RF_AC104_PROTOCOL
 #endif
 };
 
@@ -525,7 +531,13 @@ const char * const irmp_used_protocol_names[] PROGMEM =
     proto_rf_x10,
 #endif
 #if IRMP_SUPPORT_RF_MEDION_PROTOCOL == 1
-    proto_rf_medion
+    proto_rf_medion,
+#endif
+#if IRMP_SUPPORT_RF_HME_PROTOCOL == 1
+    proto_rf_hme,
+#endif
+#if IRMP_SUPPORT_RF_AC104_PROTOCOL == 1
+    proto_rf_ac104
 #endif
 };
 
